@@ -1,0 +1,13 @@
+C:\Users\ACER\Desktop\pending projects\rust-exchange\target\debug\deps\libyoke-a6ed4a44fa4a95b6.rmeta: C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\lib.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\cartable_ptr.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\either.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\erased.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\kinda_sorta_dangling.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\macro_impls.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yoke.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yokeable.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\zero_from.rs
+
+C:\Users\ACER\Desktop\pending projects\rust-exchange\target\debug\deps\yoke-a6ed4a44fa4a95b6.d: C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\lib.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\cartable_ptr.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\either.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\erased.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\kinda_sorta_dangling.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\macro_impls.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yoke.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yokeable.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\zero_from.rs
+
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\lib.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\cartable_ptr.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\either.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\erased.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\kinda_sorta_dangling.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\macro_impls.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yoke.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\yokeable.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\yoke-0.8.0\src\zero_from.rs:

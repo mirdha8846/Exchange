@@ -1,0 +1,1 @@
+fn(axum::Json<IncomingLoginRequest>) -> impl Future<Output = Result<axum::Json<LoginResponse>, axum::Json<models::ErrorResponse>>> {login_handler}
