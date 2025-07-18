@@ -35,6 +35,16 @@ pub struct IncomingOrderRequest{
     pub market: String,
 }
 
+// #[derive(Serialize,Deserialize)]
+pub struct EnrichedOrderRequest{
+    pub user_id:String,
+    pub order_id:String,
+    pub kind: OrderKind,      // buy or sell
+    pub order_type: OrderType, // limit or market
+    pub price: f64,
+    pub quantity: u64,
+    pub market: String,
+}
 
 //resposne
 
