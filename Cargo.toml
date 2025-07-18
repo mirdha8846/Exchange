@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "api-server",
+    "orderbook-engine",
+    "websocket-server",
+    "event-broadcaster",
+    "order-queue",
+    "shared"
+]
