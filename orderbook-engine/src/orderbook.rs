@@ -188,12 +188,18 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
     for price in remove_prices {
         self.sell.remove(&price);
     }
-    //and agr ab bhi sare order full-fill nhi huve unko buy orderbook me daal do
+    
+    //todo-this is wronge maket order kabhi orderbook me nhi jate
     if remaining_qty > 0 {
-        let price_level = self.buy.entry(order_price).or_insert_with(VecDeque::new);
-        let mut new_order = order.clone();
-        new_order.quantity = remaining_qty;
-        price_level.push_back(new_order);
+        // Optionally notify user that not all was filled
+        events.push(MatchEvent {
+            order_id: order.order_id.clone(),
+            matched_with: "".to_string(),
+            quantity: 0,
+            price: 0.0,
+            market: order.market.clone(),
+            event_type: "partial_cancelled".to_string(), 
+        });
     }
 
     events
@@ -202,16 +208,129 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
 
 
     fn match_limit_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
-  
-    }
-
-    fn match_market_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
-        // Market sell orders execute at any available price
         let mut events = vec![];
+    let mut remaining_qty = order.quantity;
+    let mut remove_prices = vec![];
+    let order_price = Price::from(order.price);
 
-        
-      
+     for (price,queue) in self.buy.iter_mut().rev()  {
+             if order.price>price.0{
+                break;
+             }
+         while let Some(mut buy_order)=queue.pop_front() {
+            let trade_qty=remaining_qty.min(buy_order.quantity);
+            remaining_qty-=trade_qty;
+            buy_order.quantity-=trade_qty;
+
+              // push into event
+            events.push(MatchEvent {
+                order_id: order.order_id.clone(),
+                matched_with: buy_order.order_id.clone(),
+                quantity: trade_qty,
+                price: price.0,
+                market: order.market.clone(),
+                event_type: if remaining_qty == 0 {
+                    "full_fill".to_string()
+                } else {
+                    "partial_fill".to_string()
+                },
+            });
+             
+            if buy_order.quantity>0{
+                queue.push_front(buy_order);
+            }
+            if remaining_qty==0{
+                break;
+            }
+         } 
+
+
+        if queue.is_empty() {
+            remove_prices.push(*price);
+        }
+        if remaining_qty == 0 {
+            break;
+        }
+   }
+    for price in remove_prices {
+        self.buy.remove(&price);
     }
+    //and agr ab bhi sare order full-fill nhi huve unko buy orderbook me daal do
+    if remaining_qty > 0 {
+        let price_level = self.sell.entry(order_price).or_insert_with(VecDeque::new);
+        let mut new_order = order.clone();
+        new_order.quantity = remaining_qty;
+        price_level.push_back(new_order);
+    }
+ events
+    }
+
+    pub fn match_market_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
+    let mut events = vec![];
+    let mut remaining_qty = order.quantity;
+    let mut remove_prices = vec![];
+
+    // Iterate over buy side from highest to lowest price
+    for (price, queue) in self.buy.iter_mut().rev() {
+        while let Some(mut buy_order) = queue.pop_front() {
+            let trade_qty = remaining_qty.min(buy_order.quantity);
+            remaining_qty -= trade_qty;
+            buy_order.quantity -= trade_qty;
+
+            events.push(MatchEvent {
+                order_id: order.order_id.clone(),
+                matched_with: buy_order.order_id.clone(),
+                quantity: trade_qty,
+                price: price.0,
+                market: order.market.clone(),
+                event_type: if remaining_qty == 0 {
+                    "full_fill".to_string()
+                } else {
+                    "partial_fill".to_string()
+                },
+            });
+
+            if buy_order.quantity > 0 {
+                queue.push_front(buy_order);
+                break;
+            }
+
+            if remaining_qty == 0 {
+                break;
+            }
+        }
+
+        if queue.is_empty() {
+            remove_prices.push(*price);
+        }
+
+        if remaining_qty == 0 {
+            break;
+        }
+    }
+
+    for price in remove_prices {
+        self.buy.remove(&price);
+    }
+
+    
+    // Because it's a market order; it never enters the orderbook
+
+    if remaining_qty > 0 {
+        // Optionally notify user that not all was filled
+        events.push(MatchEvent {
+            order_id: order.order_id.clone(),
+            matched_with: "".to_string(),
+            quantity: 0,
+            price: 0.0,
+            market: order.market.clone(),
+            event_type: "partial_cancelled".to_string(), // optional
+        });
+    }
+
+    events
+}
+
 }
 
 pub struct OrderBookMap {
