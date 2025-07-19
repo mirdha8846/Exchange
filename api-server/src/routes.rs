@@ -1,8 +1,11 @@
 use std::{env, sync::Arc};
-use axum::{extract::State, http::response, Extension, Json};
+use axum::{extract::State, Extension, Json};
 use dotenv::dotenv;
 use redis::AsyncCommands;
-use crate::models::{EnrichedOrderRequest, Status};
+use crate::models::{Status};
+
+// Shared structs को import करते हैं
+use shared::EnrichedOrderRequest;
 
 use super::models::{
     LoginResponse,IncomingLoginRequest,IncomingOrderRequest,
@@ -42,13 +45,15 @@ pub async fn login_handler(Json(payload):Json<IncomingLoginRequest>)->Result<Jso
 
 } 
 
+
+//future -Use a Redis pool (deadpool-redis)
 pub async fn order_handler(
     State(shared_redis): State<Arc<tokio::sync::Mutex<redis::aio::Connection>>>,
     Extension(email): Extension<String>,
     Json(payload): Json<IncomingOrderRequest>
 ) -> Result<Json<OrderResponse>, Json<ErrorResponse>>{
   let email=email;
-  //what the next
+
   let order_id=Uuid::new_v4().to_string();
   let order=EnrichedOrderRequest{
    user_id:email,

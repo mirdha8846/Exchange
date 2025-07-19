@@ -4,4 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+axum = "0.8.4"
 shared = { path = "../shared" }
+tokio = { version = "1", features = ["full"] }
+redis = { version = "0.23", features = ["tokio-comp"] }
+serde_json = "1.0.141"
+dashmap = "6.1.0"

@@ -1,18 +1,7 @@
-use std::error;
-
-use axum::Error;
 use serde::{Serialize,Deserialize};
 
-#[derive(Serialize,Deserialize)]
-pub enum OrderKind {
-    Limit,
-    Market
-}
-#[derive(Serialize,Deserialize)]
-pub enum OrderType {
-    Buy,
-   Sell
-}
+// Import shared types
+use shared::{OrderKind, OrderType, EnrichedOrderRequest};
 
 #[derive(Serialize,Deserialize)]
 pub enum Status {
@@ -30,17 +19,6 @@ pub struct IncomingLoginRequest{
 pub struct IncomingOrderRequest{
     pub kind: OrderKind,      // limit or market
     pub order_type: OrderType, // buy or sell
-    pub price: f64,
-    pub quantity: u64,
-    pub market: String,
-}
-
-#[derive(Serialize,Deserialize)]
-pub struct EnrichedOrderRequest{
-    pub user_id:String,
-    pub order_id:String,
-    pub kind: OrderKind,      // buy or sell
-    pub order_type: OrderType, // limit or market
     pub price: f64,
     pub quantity: u64,
     pub market: String,
