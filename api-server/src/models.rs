@@ -1,7 +1,7 @@
 use serde::{Serialize,Deserialize};
 
 // Import shared types
-use shared::{OrderKind, OrderType, EnrichedOrderRequest};
+use shared::{OrderKind, OrderType,MarketType };
 
 #[derive(Serialize,Deserialize)]
 pub enum Status {
@@ -21,7 +21,7 @@ pub struct IncomingOrderRequest{
     pub order_type: OrderType, // buy or sell
     pub price: f64,
     pub quantity: u64,
-    pub market: String,
+    pub market: MarketType,
 }
 
 //resposne
