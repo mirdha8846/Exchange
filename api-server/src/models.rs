@@ -28,14 +28,14 @@ pub struct IncomingLoginRequest{
 }
 #[derive(Serialize,Deserialize)]
 pub struct IncomingOrderRequest{
-    pub kind: OrderKind,      // buy or sell
-    pub order_type: OrderType, // limit or market
+    pub kind: OrderKind,      // limit or market
+    pub order_type: OrderType, // buy or sell
     pub price: f64,
     pub quantity: u64,
     pub market: String,
 }
 
-// #[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize)]
 pub struct EnrichedOrderRequest{
     pub user_id:String,
     pub order_id:String,

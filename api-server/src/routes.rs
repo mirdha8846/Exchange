@@ -1,6 +1,7 @@
-use std::env;
-use axum::{http::response, Extension, Json};
+use std::{env, sync::Arc};
+use axum::{extract::State, http::response, Extension, Json};
 use dotenv::dotenv;
+use redis::AsyncCommands;
 use crate::models::{EnrichedOrderRequest, Status};
 
 use super::models::{
@@ -41,20 +42,37 @@ pub async fn login_handler(Json(payload):Json<IncomingLoginRequest>)->Result<Jso
 
 } 
 
-pub async fn order_hanlder(Json(payload):Json<IncomingOrderRequest>,Extension(email):Extension<String>)->
-Result<Json<OrderResponse>,Json<ErrorResponse>>{
+pub async fn order_handler(
+    State(shared_redis): State<Arc<tokio::sync::Mutex<redis::aio::Connection>>>,
+    Extension(email): Extension<String>,
+    Json(payload): Json<IncomingOrderRequest>
+) -> Result<Json<OrderResponse>, Json<ErrorResponse>>{
   let email=email;
   //what the next
   let order_id=Uuid::new_v4().to_string();
   let order=EnrichedOrderRequest{
    user_id:email,
-   order_id:order_id,
+   order_id:order_id.clone(),
    kind:payload.kind,
    order_type:payload.order_type,
    price:payload.price,
    quantity:payload.quantity,
    market:payload.market
   };
+  let mut conn=shared_redis.lock().await;
+  let messg=serde_json::to_string(&order).unwrap();
+  if let Err(e) = conn.lpush::<_, _, ()>("order-queue", messg).await {
+      let response = ErrorResponse {
+          status: Status::Error,
+          error: e.to_string(),
+      };
+      return Err(Json::from(response));
+  }
   //send to queue and notify user
-  Ok(())
+ let response=OrderResponse{
+     status:Status::Success,
+    order_id:order_id
+ };
+
+  Ok(Json::from(response))
 }
