@@ -100,17 +100,18 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
                     "partial_fill".to_string()
                 },
             });
-
+           //sell order abhi baki h buying qty< selling qty to bache huve jo nhi sell huve vapis queue me
             if sell_order.quantity > 0 {
                 queue.push_front(sell_order);
                 break;
             }
-
+            //sare buying order full-fill ho gye to loop se bhar aa javo ab kuch nhi krna hme
             if remaining_qty == 0 {
                 break;
             }
         }
-        
+        // agr given price range ki queue empty ho gyi to order book se uska price bhi remove krdo, 
+        //because hmne sab sell kr diya(so un sabhi prices ko array me daal do next step me remove krne ke liye)
         if queue.is_empty() {
             remove_prices.push(*price);
         }
@@ -118,11 +119,11 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
             break;
         }
     }
-    
+    //sell orderbook se vo prices hta do jinki queue upr empty ho gyi thi
     for price in remove_prices {
         self.sell.remove(&price);
     }
-    
+    //and agr ab bhi sare order full-fill nhi huve unko buy orderbook me daal do
     if remaining_qty > 0 {
         let price_level = self.buy.entry(order_price).or_insert_with(VecDeque::new);
         let mut new_order = order.clone();
@@ -132,9 +133,73 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
 
     events
 }
+
+
+
     fn match_market_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
-       
+   let mut events = vec![];
+    let mut remaining_qty = order.quantity;
+    let mut remove_prices = vec![];
+    let order_price = Price::from(order.price);
+
+    for (price, queue) in self.sell.iter_mut() {
+       //this two line feature add in next version
+       // if we want then we can add ki order actual(current sell price)
+       // price se 1-2% se jyda manhega ho rha h to buy ko stop there
+
+        while let Some(mut sell_order) = queue.pop_front() {
+            let trade_qty = remaining_qty.min(sell_order.quantity);
+            remaining_qty -= trade_qty;
+            sell_order.quantity -= trade_qty;
+            
+            // push into event
+            events.push(MatchEvent {
+                order_id: order.order_id.clone(),
+                matched_with: sell_order.order_id.clone(),
+                quantity: trade_qty,
+                price: price.0,
+                market: order.market.clone(),
+                event_type: if remaining_qty == 0 {
+                    "full_fill".to_string()
+                } else {
+                    "partial_fill".to_string()
+                },
+            });
+           //sell order abhi baki h buying qty< selling qty to bache huve jo nhi sell huve vapis queue me
+            if sell_order.quantity > 0 {
+                queue.push_front(sell_order);
+                break;
+            }
+            //sare buying order full-fill ho gye to loop se bhar aa javo ab kuch nhi krna hme
+            if remaining_qty == 0 {
+                break;
+            }
+        }
+        // agr given price range ki queue empty ho gyi to order book se uska price bhi remove krdo, 
+        //because hmne sab sell kr diya(so un sabhi prices ko array me daal do next step me remove krne ke liye)
+        if queue.is_empty() {
+            remove_prices.push(*price);
+        }
+        if remaining_qty == 0 {
+            break;
+        }
     }
+    //sell orderbook se vo prices hta do jinki queue upr empty ho gyi thi
+    for price in remove_prices {
+        self.sell.remove(&price);
+    }
+    //and agr ab bhi sare order full-fill nhi huve unko buy orderbook me daal do
+    if remaining_qty > 0 {
+        let price_level = self.buy.entry(order_price).or_insert_with(VecDeque::new);
+        let mut new_order = order.clone();
+        new_order.quantity = remaining_qty;
+        price_level.push_back(new_order);
+    }
+
+    events
+    
+    }
+
 
     fn match_limit_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
   
