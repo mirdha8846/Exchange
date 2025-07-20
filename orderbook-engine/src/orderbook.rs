@@ -134,8 +134,6 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
     events
 }
 
-
-
     fn match_market_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
    let mut events = vec![];
     let mut remaining_qty = order.quantity;
@@ -333,19 +331,4 @@ fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
 
 }
 
-pub struct OrderBookMap {
-    pub books: DashMap<String, OrderBook>,
-}
-
-impl OrderBookMap {
-    pub fn new() -> Self {
-        Self {
-            books: DashMap::new(),
-        }
-    }
-
-    pub fn get_or_create(&self, market: &str) -> dashmap::mapref::one::RefMut<String, OrderBook> {
-        self.books.entry(market.to_string()).or_insert_with(OrderBook::new)
-    }
-}
 

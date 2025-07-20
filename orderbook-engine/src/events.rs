@@ -1,10 +1,11 @@
+use std::sync::{Arc, Mutex};
+
 use redis::AsyncCommands;
 use serde_json;
 use shared::MatchEvent;
-pub async fn publish_event(event: MatchEvent) {
-    if let Ok(client) = redis::Client::open("redis://127.0.0.1/") {
-        if let Ok(mut conn) = client.get_async_connection().await {
-            let json = serde_json::to_string(&event).unwrap();
-            let _: () = conn.lpush("event-queue", json).await.unwrap();
-        }
-    }}
+pub async fn publish_event(event: MatchEvent, conn: &Arc<tokio::sync::Mutex<redis::aio::Connection>>) {
+    let json = serde_json::to_string(&event).unwrap();
+    let mut conn = conn.lock().await;
+
+    let _: () = conn.lpush("event-queue", json).await.unwrap();
+}
