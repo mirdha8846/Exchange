@@ -1,0 +1,1 @@
+fn(axum::Json<IncomingOrderRequest>, Extension<std::string::String>) -> impl std::future::Future<Output = Result<axum::Json<OrderResponse>, axum::Json<models::ErrorResponse>>> {order_hanlder}

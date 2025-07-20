@@ -1,0 +1,1 @@
+fn(axum::extract::State<Arc<tokio::sync::Mutex<redis::aio::Connection>>>, Extension<std::string::String>, axum::Json<IncomingOrderRequest>) -> impl std::future::Future<Output = Result<axum::Json<OrderResponse>, axum::Json<models::ErrorResponse>>> {order_handler}

@@ -1,0 +1,1 @@
+Result<std::sync::MutexGuard<'_, redis::aio::Connection<Pin<Box<dyn AsyncStream + Send + Sync>>>>, PoisonError<std::sync::MutexGuard<'_, redis::aio::Connection<Pin<Box<dyn AsyncStream + Send + Sync>>>>>>

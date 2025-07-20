@@ -1,0 +1,10 @@
+C:\Users\ACER\Desktop\pending projects\rust-exchange\target\debug\deps\libtokio_tungstenite-8d6fd544ca8a8557.rmeta: C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\lib.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\compat.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\connect.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\handshake.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\stream.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\tls.rs
+
+C:\Users\ACER\Desktop\pending projects\rust-exchange\target\debug\deps\tokio_tungstenite-8d6fd544ca8a8557.d: C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\lib.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\compat.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\connect.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\handshake.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\stream.rs C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\tls.rs
+
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\lib.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\compat.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\connect.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\handshake.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\stream.rs:
+C:\Users\ACER\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-tungstenite-0.26.2\src\tls.rs:

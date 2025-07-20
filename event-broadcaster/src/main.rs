@@ -1,5 +1,5 @@
 mod socket_handler;
-mod try;
+
 use std::sync::{Arc};
 use axum::{
     Router,routing::get,

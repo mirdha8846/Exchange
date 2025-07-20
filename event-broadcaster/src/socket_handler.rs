@@ -9,7 +9,7 @@ use dashmap::DashMap;
 use futures_util::{StreamExt, SinkExt};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
-use shared::{MatchEvent, IncomingMessage,EventType,MarketType};
+use shared::{MatchEvent, IncomingMarketType, EventType, MarketType};
 
 // Type aliases for readability
 pub type Tx = UnboundedSender<Message>;
@@ -19,8 +19,12 @@ pub type Market = MarketType;
 // Shared application state
 #[derive(Debug, Clone)]
 pub struct AppState {
-    pub connections: Arc<DashMap<UserId, Tx>>, // Active users and their senders
-    pub subscribers: Arc<DashMap<Market, HashSet<UserId>>>, // Market-wise subscribers
+    // this connections looks like this
+    // "user123" => tx123
+    // "user456" => tx456
+
+    pub connections: Arc<DashMap<UserId, Tx>>,               // Active users and their senders
+    pub subscribers: Arc<DashMap<Market, HashSet<UserId>>>,  // Market-wise subscribers
 }
 
 impl AppState {
@@ -52,8 +56,8 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
     let (mut ws_sender, mut ws_receiver) = socket.split();
 
     // Step 2: Create unbounded channel to send messages to this user
-    //a Rust internal communication channel (not related to the WebSocket) 
-    //that our server uses internally.
+    // a Rust internal communication channel (not related to the WebSocket) 
+    // that our server uses internally.
     let (tx, mut rx) = unbounded_channel::<Message>();
 
     // Step 3: Store user sender in AppState
@@ -65,9 +69,9 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
     tokio::spawn(async move {
         while let Some(Ok(msg)) = ws_receiver.next().await {
             if let Message::Text(text) = msg {
-                if let Ok(req) = serde_json::from_str::<IncomingMessage>(&text) {
+                if let Ok(req) = serde_json::from_str::<IncomingMarketType>(&text) {
                     match req {
-                        IncomingMessage::SubscribeOrderbook { market } => {
+                        IncomingMarketType::SubscribeOrderbook(market) => {
                             state_clone
                                 .subscribers
                                 .entry(market)
@@ -81,6 +85,21 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
     });
 
     // Step 5: Forward messages from rx to WebSocket client
+    //rust me js ki trh event specific nhi hota sab ko ek hi jegh send krte h jese abhi kr rhe h
+    /*
+    this is how we get in frontend
+    socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  if (data.event_type === "PartialFill") {
+    // Update user-specific status AND orderbook
+  } else if (data.event_type === "FullFill") {
+    // Notify user that order is fully filled
+  } else if (data.event_type === "MarketPartialFill") {
+    // Show market-specific notification to user
+  }
+};
+     */
     while let Some(outgoing_msg) = rx.recv().await {
         if ws_sender.send(outgoing_msg).await.is_err() {
             break; // client disconnected
@@ -96,29 +115,28 @@ pub async fn handle_event(event: MatchEvent, state: Arc<AppState>) {
     let msg = Message::Text(serde_json::to_string(&event).unwrap().into());
 
     match event.event_type {
-        //these two type only user specific not on
-       
-        EventType::FullFill | EventType::MarketPartialFill  => {
+        // these two type only user specific not on
+        EventType::FullFill | EventType::MarketPartialFill => {
             if let Some(conn) = state.connections.get(&event.user_id) {
                 let _ = conn.send(msg.clone());
             }
         },
-        //ye user specific ko bhi jayega and orderbook ko bhi jayega
-      EventType::PartialFill => {
-    // 1. Notify user
-    if let Some(conn) = state.connections.get(&event.user_id) {
-        let _ = conn.send(msg.clone());
-    }
 
-    // 2. Notify all market subscribers — **including the user also**
-    if let Some(user_ids) = state.subscribers.get(&event.market) {
-        for user_id in user_ids.iter() {
-            if let Some(conn) = state.connections.get(user_id) {
+        // ye user specific ko bhi jayega and orderbook ko bhi jayega
+        EventType::PartialFill => {
+            // 1. Notify user
+            if let Some(conn) = state.connections.get(&event.user_id) {
                 let _ = conn.send(msg.clone());
             }
-        }
-    }
-}
 
+            // 2. Notify all market subscribers — **including the user also**
+            if let Some(user_ids) = state.subscribers.get(&event.market) {
+                for user_id in user_ids.iter() {
+                    if let Some(conn) = state.connections.get(user_id) {
+                        let _ = conn.send(msg.clone());
+                    }
+                }
+            }
+        }
     }
 }
