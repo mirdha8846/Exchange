@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 shared = { path = "../shared" }
+redis = { version = "0.23", features = ["tokio-comp"] }
+tokio = { version = "1", features = ["full"] }
+serde_json = "1.0.141"
