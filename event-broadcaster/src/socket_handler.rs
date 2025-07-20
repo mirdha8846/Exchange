@@ -9,12 +9,12 @@ use dashmap::DashMap;
 use futures_util::{StreamExt, SinkExt};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
-use shared::{MatchEvent, IncomingMessage,EventType};
+use shared::{MatchEvent, IncomingMessage,EventType,MarketType};
 
 // Type aliases for readability
 pub type Tx = UnboundedSender<Message>;
 pub type UserId = String;
-pub type Market = String;
+pub type Market = MarketType;
 
 // Shared application state
 #[derive(Debug, Clone)]
@@ -98,21 +98,27 @@ pub async fn handle_event(event: MatchEvent, state: Arc<AppState>) {
     match event.event_type {
         //these two type only user specific not on
        
-        EventType::FullFill | EventType::MarketPartialFill /*| "partial_fill" | "cancelled"*/ => {
+        EventType::FullFill | EventType::MarketPartialFill  => {
             if let Some(conn) = state.connections.get(&event.user_id) {
                 let _ = conn.send(msg.clone());
             }
         },
         //ye user specific ko bhi jayega and orderbook ko bhi jayega
-        EventType::PartialFill => {
-            if let Some(user_ids) = state.subscribers.get(&event.market) {
-                for user_id in user_ids.iter() {
-                    if let Some(conn) = state.connections.get(user_id) {
-                        let _ = conn.send(msg.clone());
-                    }
-                }
+      EventType::PartialFill => {
+    // 1. Notify user
+    if let Some(conn) = state.connections.get(&event.user_id) {
+        let _ = conn.send(msg.clone());
+    }
+
+    // 2. Notify all market subscribers — **including the user also**
+    if let Some(user_ids) = state.subscribers.get(&event.market) {
+        for user_id in user_ids.iter() {
+            if let Some(conn) = state.connections.get(user_id) {
+                let _ = conn.send(msg.clone());
             }
-        },
-        _ => {}
+        }
+    }
+}
+
     }
 }
