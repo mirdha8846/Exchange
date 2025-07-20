@@ -8,3 +8,6 @@ shared = { path = "../shared" }
 redis = { version = "0.23", features = ["tokio-comp"] }
 tokio = { version = "1", features = ["full"] }
 serde_json = "1.0.141"
+axum = {version="0.8.4",features=["ws"]}
+dashmap = "6.1.0"
+futures-util = "0.3.31"

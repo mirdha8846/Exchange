@@ -92,9 +92,11 @@ impl OrderBook {
                 // push into event
                 events.push(MatchEvent {
                     order_id: order.order_id.clone(),
+                    user_id:order.user_id.clone(),
                     matched_with: sell_order.order_id.clone(),
                     quantity: trade_qty,
                     price: price.0,
+                    order_kind:OrderKind::Limit,
                     market: order.market.clone(),
                     event_type: if remaining_qty == 0 {
                         EventType::FullFill
@@ -155,9 +157,11 @@ impl OrderBook {
                 // push into event
                 events.push(MatchEvent {
                     order_id: order.order_id.clone(),
+                    user_id:order.user_id.clone(),
                     matched_with: sell_order.order_id.clone(),
                     quantity: trade_qty,
                     price: price.0,
+                    order_kind:OrderKind::Market,
                     market: order.market.clone(),
                     event_type: if remaining_qty == 0 {
                         EventType::FullFill
@@ -188,20 +192,6 @@ impl OrderBook {
         for price in remove_prices {
             self.sell.remove(&price);
         }
-
-        //todo-this is wronge maket order kabhi orderbook me nhi jate
-        if remaining_qty > 0 {
-            // Optionally notify user that not all was filled
-            events.push(MatchEvent {
-                order_id: order.order_id.clone(),
-                matched_with: "".to_string(),
-                quantity: 0,
-                price: 0.0,
-                market: order.market.clone(),
-                event_type: EventType::MarketPartialFill,
-            });
-        }
-
         events
     }
 
@@ -223,9 +213,11 @@ impl OrderBook {
                 // push into event
                 events.push(MatchEvent {
                     order_id: order.order_id.clone(),
+                    user_id:order.user_id.clone(),
                     matched_with: buy_order.order_id.clone(),
                     quantity: trade_qty,
                     price: price.0,
+                    order_kind:OrderKind::Limit,
                     market: order.market.clone(),
                     event_type: if remaining_qty == 0 {
                         EventType::FullFill
@@ -276,9 +268,11 @@ impl OrderBook {
 
                 events.push(MatchEvent {
                     order_id: order.order_id.clone(),
+                    user_id:order.user_id.clone(),
                     matched_with: buy_order.order_id.clone(),
                     quantity: trade_qty,
                     price: price.0,
+                    order_kind:OrderKind::Market,
                     market: order.market.clone(),
                     event_type: if remaining_qty == 0 {
                         EventType::FullFill
@@ -308,20 +302,6 @@ impl OrderBook {
 
         for price in remove_prices {
             self.buy.remove(&price);
-        }
-
-        // Because it's a market order; it never enters the orderbook
-
-        if remaining_qty > 0 {
-            // Optionally notify user that not all was filled
-            events.push(MatchEvent {
-                order_id: order.order_id.clone(),
-                matched_with: "".to_string(),
-                quantity: 0,
-                price: 0.0,
-                market: order.market.clone(),
-                event_type: EventType::MarketPartialFill, // optional
-            });
         }
 
         events
