@@ -38,7 +38,7 @@ async fn main() {
 
             if let Some((_, raw)) = data {
                 if let Ok(event) = serde_json::from_str::<MatchEvent>(&raw) {
-                    handle_event(event, state_clone.clone()).await;
+                    handle_event(event, &state_clone).await;
                 }
             }
         }

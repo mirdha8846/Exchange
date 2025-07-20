@@ -64,6 +64,8 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
     state.connections.insert(user_id.clone(), tx);
 
     // Step 4: Spawn background task to receive messages from the client
+    //tokio::spawn(...) ke closure ke andar agar aap outer variable use karna
+    // chahte ho to uska ownership ya clone chahiye.(means userid,state both ka clone krna pdega )
     let state_clone = Arc::clone(&state);
     let user_id_clone = user_id.clone();
     tokio::spawn(async move {
@@ -74,9 +76,9 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
                         IncomingMarketType::SubscribeOrderbook(market) => {
                             state_clone
                                 .subscribers
-                                .entry(market)
-                                .or_default()
-                                .insert(user_id_clone.clone());
+                                .entry(market)//this one search for market
+                                .or_default()//agr market nhi mila to bna dega with empty hashset
+                                .insert(user_id_clone.clone());//and ye us market se userid map kr dega
                         }
                     }
                 }
@@ -111,7 +113,7 @@ pub async fn handle_socket(socket: WebSocket, user_id: UserId, state: Arc<AppSta
 }
 
 // Event handler that sends messages to specific users or all subscribers
-pub async fn handle_event(event: MatchEvent, state: Arc<AppState>) {
+pub async fn handle_event(event: MatchEvent, state: &Arc<AppState>) {
     let msg = Message::Text(serde_json::to_string(&event).unwrap().into());
 
     match event.event_type {
