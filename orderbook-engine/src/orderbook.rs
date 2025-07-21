@@ -1,6 +1,6 @@
-
-use shared::{EnrichedOrderRequest, MatchEvent, OrderKind, OrderType,EventType};
+use shared::{EnrichedOrderRequest, MatchEvent, OrderKind, OrderType, EventType};
 use std::collections::{BTreeMap, VecDeque};
+use metrics::{counter, histogram};
 
 // Wrapper for f64 that implements Ord
 //because Btree me keys ko sortable hona zaruri hai
@@ -15,9 +15,7 @@ impl Eq for Price {}
 //implementing Ord on Price ,so this can be comprable
 impl Ord for Price {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.0
-            .partial_cmp(&other.0)
-            .unwrap_or(std::cmp::Ordering::Equal)
+        self.0.partial_cmp(&other.0).unwrap_or(std::cmp::Ordering::Equal)
     }
 }
 // From trait ek conversion trait h,
@@ -74,6 +72,9 @@ impl OrderBook {
     }
 
     fn match_limit_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
+        let start = std::time::Instant::now();
+        counter!("order_match_attempts_total", 1, "side" => "buy", "kind" => "limit");
+
         let mut events = vec![];
         let mut remaining_qty = order.quantity;
         let mut remove_prices = vec![];
@@ -104,6 +105,10 @@ impl OrderBook {
                         EventType::PartialFill
                     },
                 });
+                counter!("order_matched_quantity_total", trade_qty as u64, "side" => "buy");
+                let fill_type = if remaining_qty == 0 { "FullFill" } else { "PartialFill" };
+                counter!("order_match_fill_type_total", 1, "side" => "buy", "kind" => "limit", "fill_type" => fill_type);
+
                 //sell order abhi baki h buying qty< selling qty to bache huve jo nhi sell huve vapis queue me
                 if sell_order.quantity > 0 {
                     queue.push_front(sell_order);
@@ -134,11 +139,14 @@ impl OrderBook {
             new_order.quantity = remaining_qty;
             price_level.push_back(new_order);
         }
-
+        histogram!("order_match_duration_seconds", start.elapsed().as_secs_f64(), "side" => "buy", "kind" => "limit");
         events
     }
 
     fn match_market_buy(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
+        let start = std::time::Instant::now();
+        counter!("order_match_attempts_total", 1, "side" => "buy", "kind" => "market");
+
         let mut events = vec![];
         let mut remaining_qty = order.quantity;
         let mut remove_prices = vec![];
@@ -169,6 +177,10 @@ impl OrderBook {
                         EventType::PartialFill
                     },
                 });
+                counter!("order_matched_quantity_total", trade_qty as u64, "side" => "buy");
+                let fill_type = if remaining_qty == 0 { "FullFill" } else { "PartialFill" };
+                counter!("order_match_fill_type_total", 1, "side" => "buy", "kind" => "market", "fill_type" => fill_type);
+
                 //sell order abhi baki h buying qty< selling qty to bache huve jo nhi sell huve vapis queue me
                 if sell_order.quantity > 0 {
                     queue.push_front(sell_order);
@@ -192,10 +204,14 @@ impl OrderBook {
         for price in remove_prices {
             self.sell.remove(&price);
         }
+        histogram!("order_match_duration_seconds", start.elapsed().as_secs_f64(), "side" => "buy", "kind" => "market");
         events
     }
 
     fn match_limit_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
+        let start = std::time::Instant::now();
+        counter!("order_match_attempts_total", 1, "side" => "sell", "kind" => "limit");
+
         let mut events = vec![];
         let mut remaining_qty = order.quantity;
         let mut remove_prices = vec![];
@@ -225,6 +241,9 @@ impl OrderBook {
                         EventType::PartialFill
                     },
                 });
+                counter!("order_matched_quantity_total", trade_qty as u64, "side" => "sell");
+                let fill_type = if remaining_qty == 0 { "FullFill" } else { "PartialFill" };
+                counter!("order_match_fill_type_total", 1, "side" => "sell", "kind" => "limit", "fill_type" => fill_type);
 
                 if buy_order.quantity > 0 {
                     queue.push_front(buy_order);
@@ -251,10 +270,14 @@ impl OrderBook {
             new_order.quantity = remaining_qty;
             price_level.push_back(new_order);
         }
+        histogram!("order_match_duration_seconds", start.elapsed().as_secs_f64(), "side" => "sell", "kind" => "limit");
         events
     }
 
     pub fn match_market_sell(&mut self, order: EnrichedOrderRequest) -> Vec<MatchEvent> {
+        let start = std::time::Instant::now();
+        counter!("order_match_attempts_total", 1, "side" => "sell", "kind" => "market");
+
         let mut events = vec![];
         let mut remaining_qty = order.quantity;
         let mut remove_prices = vec![];
@@ -280,6 +303,9 @@ impl OrderBook {
                         EventType::PartialFill
                     },
                 });
+                counter!("order_matched_quantity_total", trade_qty as u64, "side" => "sell");
+                let fill_type = if remaining_qty == 0 { "FullFill" } else { "PartialFill" };
+                counter!("order_match_fill_type_total", 1, "side" => "sell", "kind" => "market", "fill_type" => fill_type);
 
                 if buy_order.quantity > 0 {
                     queue.push_front(buy_order);
@@ -304,6 +330,7 @@ impl OrderBook {
             self.buy.remove(&price);
         }
 
+        histogram!("order_match_duration_seconds", start.elapsed().as_secs_f64(), "side" => "sell", "kind" => "market");
         events
     }
 }

@@ -1,22 +1,42 @@
 mod socket_handler;
-
+use sysinfo::{System};
 use std::sync::{Arc};
 use axum::{
-    Router,routing::get,
+    response::IntoResponse, routing::get, Router
     // extract::{State,}
 };
 use socket_handler::{AppState, ws_handler, handle_event};
 // use tokio::sync::broadcast;
 //todo - events lena and unhe websocket and pub-sub donu ko send krna according to event type
 use redis;
+use metrics_exporter_prometheus::PrometheusBuilder;
+use metrics::gauge;
 use shared::{MatchEvent};
+use tower_http::{trace::TraceLayer};
+
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt().init();
     let state = Arc::new(AppState::new());
-
+    let recorder=PrometheusBuilder::new().build_recorder();
+    let handle=recorder.handle();
+    let handle_clone=handle.clone();
+        tokio::spawn(async {
+        let mut sys = System::new_all();
+        loop {
+            sys.refresh_memory();
+            let mem = sys.used_memory() as f64; // Bytes
+            gauge!("memory_usage_bytes", mem);
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        }
+    });
     let app = Router::new()
         .route("/ws", get(ws_handler))
+        .route("/metrics", get(move || async move {
+           handle_clone.render().into_response()
+        }))
+        .layer(TraceLayer::new_for_http())
         .with_state(state.clone());
 
     // Redis setup

@@ -11,3 +11,8 @@ serde_json = "1.0.141"
 axum = {version="0.8.4",features=["ws"]}
 dashmap = "6.1.0"
 futures-util = "0.3.31"
+metrics = "0.21"
+metrics-exporter-prometheus = "0.11"
+sysinfo = "0.36.0"
+tracing-subscriber = "0.3.19"
+tower-http = {version="0.6.6",features = ["trace"]}

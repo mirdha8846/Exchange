@@ -2,14 +2,35 @@ mod config;
 mod events;
 mod orderbook;
 use std::sync::Arc;
-
+use axum::{response::IntoResponse, routing::get, Router};
 use config::get_clinet;
 use dashmap::DashMap;
 use events::publish_event;
 use orderbook::OrderBook;
 use shared::{EnrichedOrderRequest, MarketType};
+use metrics_exporter_prometheus::PrometheusBuilder;
+use sysinfo::System;
+use metrics::gauge;
 #[tokio::main]
 async fn main() {
+    let recorder=PrometheusBuilder::new().build_recorder();
+    let handle=recorder.handle();
+    let handle_clone=handle.clone();
+    
+    tokio::spawn(async {
+        let mut sys = System::new_all();
+        loop {
+            sys.refresh_memory();
+            let mem = sys.used_memory() as f64; // Bytes
+            gauge!("memory_usage_bytes", mem);
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        }
+    });
+    let app=Router::new().route("/metrics", get(move || async move {
+           handle_clone.render().into_response()
+        }));
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3600").await.unwrap();
+    
     let mut conn = get_clinet().await;
     //create connection for event-queue
     let redis_client = redis::Client::open("redis://127.0.0.1/").unwrap();
@@ -39,4 +60,6 @@ async fn main() {
             }
         }
     }
+    println!("Server running on http://0.0.0.0:3600");
+    axum::serve(listener, app).await.unwrap();
 }

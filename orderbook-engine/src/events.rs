@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
 
 use redis::AsyncCommands;
 use serde_json;
