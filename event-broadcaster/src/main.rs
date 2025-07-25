@@ -55,6 +55,7 @@ async fn main() {
                 .query_async(&mut *conn)
                 .await
                 .ok();
+            drop(conn);
 
             if let Some((_, raw)) = data {
                 if let Ok(event) = serde_json::from_str::<MatchEvent>(&raw) {
